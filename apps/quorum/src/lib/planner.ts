@@ -5,15 +5,16 @@ import { syntheticCandidates } from "./demo";
 import { extractAffinity } from "./qloo-affinity";
 import { insights, searchTags } from "./qloo";
 import { selectPoolIds } from "./candidate-pool";
+import { DINING_TAG, isFoodPlace } from "./dining-filter";
 import { appendLlmNarration } from "./llm-narration";
 import type { Candidate, Category, Plan, QuorumEvent, TraceStep } from "./types";
 
 async function liveCandidates(event: QuorumEvent, log: (agent: string, detail: string) => void) {
-  const diningTags = await searchTags("restaurant");
+  // Dining uses Qloo's restaurant genre tag directly (the first /v2/tags hit is not reliable).
+  const diningTag = DINING_TAG;
   const activityTags = await searchTags("museum");
-  const diningTag = diningTags[0]?.id ?? diningTags.find(t => t.name.toLowerCase().includes("restaurant"))?.id;
   const activityTag = activityTags[0]?.id;
-  if (!diningTag || !activityTag) {
+  if (!activityTag) {
     log("Scout", "Tag lookup returned sparse results; continuing with entity signals only.");
   } else {
     log("Scout", `Resolved dining and activity tags through /v2/tags; gathering candidates in ${event.city}.`);
@@ -29,7 +30,8 @@ async function liveCandidates(event: QuorumEvent, log: (agent: string, detail: s
     const lists = await Promise.allSettled(event.attendees.map(a => insights(a.favorites, slot.type, event.city, undefined, slot.tags)));
     const failed = lists.find(result => result.status === "rejected");
     if (failed?.status === "rejected") throw failed.reason;
-    const successful = lists.flatMap(list => list.status === "fulfilled" ? [list.value] : []);
+    const successful = lists.flatMap(list => list.status === "fulfilled" ? [list.value] : [])
+      .map(list => slot.category === "dining" ? list.filter(isFoodPlace) : list);
     const metadata = new Map(successful.flat().map(entity => [entity.entity_id, entity]));
     const pool = new Map<string, Candidate>(selectPoolIds(successful, 8).map(id => {
       const entity = metadata.get(id)!;
