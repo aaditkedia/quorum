@@ -1,2 +1,3 @@
 import QuorumApp from "./quorum-app";
-export default function Page() { return <QuorumApp />; }
+import { KHero } from "./_khero/KHero";
+export default function Page() { return <><KHero name={"Quorum"} tag={"Taste Club"} eyebrow={"A better way to get together"} body={"Give every taste a seat at the table. Quorum scores real Qloo taste affinity and finds the plan that's fairest to everyone."} stat={"Every voice counts \u00b7 Maximin fairness"} primary={"Try the working demo"} secondary={"Plan something new"} accent={"#e0a04a"} features={["Qloo taste affinity", "Maximin fairness", "Private invite links", "Dining \u00b7 activity \u00b7 playlist", "Happiness matrix", "Swarm timeline", "Optional LLM narration", "No fake bookings"]} image={"/hero.webp"} /><div id="app"><QuorumApp /></div></>; }
