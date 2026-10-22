@@ -11,7 +11,8 @@ const entitySchema = z.object({
   types: z.array(z.string()).optional(),
   properties: z.object({ description: z.string().optional() }).passthrough().optional(),
   // Entity tags use `tag_id` on live responses; older docs show `id`.
-  tags: z.array(z.object({ id: z.string().optional(), tag_id: z.string().optional(), name: z.string() }).passthrough()).optional(),
+  // Some live tags omit `name`; keep them optional and drop unnamed ones in the UI.
+  tags: z.array(z.object({ id: z.string().optional(), tag_id: z.string().optional(), name: z.string().optional() }).passthrough()).optional(),
   query: z.object({ affinity: z.number().optional(), score: z.number().optional() }).passthrough().optional(),
 }).passthrough().transform(e => ({ ...e, subtype: e.subtype ?? e.types?.[0] ?? "" }));
 

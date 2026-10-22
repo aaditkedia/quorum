@@ -33,7 +33,7 @@ async function liveCandidates(event: QuorumEvent, log: (agent: string, detail: s
     const metadata = new Map(successful.flat().map(entity => [entity.entity_id, entity]));
     const pool = new Map<string, Candidate>(selectPoolIds(successful, 8).map(id => {
       const entity = metadata.get(id)!;
-      return [id, { id: `${slot.category}:${id}`, entityId: id, name: entity.name, category: slot.category, type: slot.type, description: entity.properties?.description?.slice(0, 450) || "Qloo entity. Check venue details and availability before booking.", tags: (entity.tags ?? []).slice(0, 3).map(t => t.name), scores: {}, source: "qloo" }];
+      return [id, { id: `${slot.category}:${id}`, entityId: id, name: entity.name, category: slot.category, type: slot.type, description: entity.properties?.description?.slice(0, 450) || "Qloo entity. Check venue details and availability before booking.", tags: (entity.tags ?? []).flatMap(t => (t.name ? [t.name] : [])).slice(0, 3), scores: {}, source: "qloo" }];
     }));
     const ids = [...pool.keys()];
     if (!ids.length) throw new Error(`No Qloo ${slot.category} coverage. Try a city with documented coverage.`);
