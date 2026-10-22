@@ -1,0 +1,17 @@
+node_modules/
+.next/
+.env*
+!.env.example
+.data/
+*.tsbuildinfo
+*.log
+target/
+test-results/
+playwright-report/
+.toolchains/
+.anchor/
+test-ledger/
+__pycache__/
+.gg-oidc-token
+.gg-gcp-credentials.json
+uploads/

@@ -1,0 +1,9 @@
+export type Mode = "demo" | "live";
+export type Favorite = { id: string; name: string; type: string; source: "synthetic" | "qloo"; selectionProof?: string };
+export type Attendee = { id: string; name: string; favorites: Favorite[]; profile?: number };
+export type Category = "dining" | "activity" | "playlist" | "destination";
+export type Candidate = { id: string; entityId?: string; name: string; category: Category; type: string; description: string; tags: string[]; scores: Record<string, number>; source: "synthetic" | "qloo" };
+export type TraceStep = { seq: number; agent: string; detail: string; status: "complete" | "blocked"; createdAt: string };
+export type Plan = { id: string; mode: Mode; candidates: Candidate[]; picks: string[]; happiness: Record<string, number>; minimum: number; average: number; baselineMinimum: number; borda: number; combinations: number; steps: TraceStep[]; createdAt: string };
+export type QuorumEvent = { id: string; name: string; type: "social" | "dinner" | "trip"; city: string; budget: number; date: string; mode: Mode; inviteToken: string; createdAt: string; attendees: Attendee[]; plan?: Plan; organizerUserId?: string };
+export type EventView = Omit<QuorumEvent, "inviteToken"> & { joinPath?: string; role: "organizer" | "attendee"; selfId?: string; integration: { configured: boolean; status: string } };

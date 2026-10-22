@@ -1,0 +1,10 @@
+// Optional production migration example; requires drizzle-orm (not installed offline).
+import { pgTable, uuid, text, integer, timestamp, date } from "drizzle-orm/pg-core";
+export const events = pgTable("quorum_events", {
+  id: uuid("id").primaryKey(), organizerUserId: text("organizer_user_id").notNull(),
+  inviteTokenHash: text("invite_token_hash").notNull().unique(), name: text("name").notNull(),
+  eventType: text("event_type").notNull(), city: text("city").notNull(),
+  budget: integer("budget").notNull(), eventDate: date("event_date").notNull(),
+  mode: text("mode").notNull(), createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+// Complete authoritative initial table definitions are in drizzle/0000_quorum.sql.
