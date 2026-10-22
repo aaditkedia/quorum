@@ -7,3 +7,22 @@
 
 .srOnly{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 .app .overlay{width:100vw;max-width:none;height:100dvh;max-height:none;margin:0;border:0;color:var(--ink);font-family:inherit}.overlay::backdrop{background:#30213b44}.overlay:not([open]){display:none}.selectedList{display:flex;gap:7px;flex-wrap:wrap;margin:15px 0}.selectedList button{display:inline-flex;align-items:center;gap:7px;border:1px solid #d6c4e6;border-radius:20px;background:#f4eef9;color:#674685;padding:6px 10px;font-size:10px}.app .privacyNote{color:#675d72;background:#f6f2fa;border-radius:7px;padding:12px;font-size:11px}.app .inlineError{color:#a43535}.joinCard>.primary{margin-right:10px}.app .navLabel,.app .workspace small,.app .profile small,.app .sideNote p,.app .sideNote>span,.app .eyebrow,.app .heroProof>span,.app .cardNumber,.app .howCard p,.app .honesty p,.app .honesty>span,.app .eventMeta,.app .modeNote>span,.app .modeNote p,.app .stepLabel,.app .person small,.app .metrics small,.app .metrics em,.app .metricPill,.app .pickBody>p,.app .tags span,.app .pickFit>span,.app .pickFit small,.app .nextRow p,.app .footer,.app .memberCard p,.app .favoriteLine small,.app .matrix thead th small,.app .fairnessExplain p,.app .smallText,.app .empty p,.app .joinCard p,.app .favorite small,.app .favoriteSelected small,.app .modal>p,.app .modal label,.app .formHint,.app .sectionTitle>span{color:#74667f}.app .pageHeading p:not(.eyebrow){color:#74667f}.app .favorite:disabled{cursor:not-allowed;opacity:.65}.app button:focus-visible,.app a:focus-visible{outline:3px solid #7954ba;outline-offset:3px}.app input::placeholder{color:#87778f}.app .topbar>span:first-child{color:#75697d}.app .favoriteGrid button{min-height:108px}.app .navButton{min-height:44px}.app .closeModal{min-width:44px;min-height:44px;top:7px;right:7px}.app .addPerson{min-height:44px;min-width:44px}.app .primary,.app .secondary{min-height:42px}.app .selectedList button{min-height:36px}
+/* kediora-inspired refresh */
+.pageHeading h1,.sectionTitle h2{font-family:"Cormorant Garamond",Georgia,serif;font-weight:400;letter-spacing:-.5px}
+.sectionTitle h2{font-size:30px}
+.eyebrow,.stepLabel{letter-spacing:3px;font-weight:500}
+.primary,.secondary{border-radius:2px;text-transform:uppercase;letter-spacing:1.6px;font-size:11px!important}
+.heroDark{position:relative;background:radial-gradient(120% 90% at 80% 20%,#2a2230 0%,#121015 45%,#08080a 100%);color:#f4f4f6;border-radius:4px;padding:64px 56px;margin:6px 0 40px;overflow:hidden;box-shadow:0 40px 120px -50px #000000d9}
+.heroDark::before,.heroDark::after{content:"";position:absolute;width:22px;height:22px;border:1px solid #ffffff40;pointer-events:none}
+.heroDark::before{left:18px;top:18px;border-right:0;border-bottom:0}
+.heroDark::after{right:18px;bottom:18px;border-left:0;border-top:0}
+.heroDark h1{font-weight:300;font-size:64px;letter-spacing:.5px;line-height:1.05;color:#f4f4f6}
+.heroDark h1>span{color:#f32b42}
+.heroDark h1::after{content:"";display:block;width:64px;height:1px;background:#f32b42;margin-top:22px}
+.heroDark .eyebrow{color:#9a9aa6;font-size:11px}
+.heroDark p:not(.eyebrow){color:#c9ccd2!important}
+.heroDark .primary{background:#f4f4f6;color:#08080a;border-color:#f4f4f6;box-shadow:none}
+.heroDark .primary:hover{background:transparent;color:#f4f4f6}
+.heroDark .secondary{background:transparent;color:#f4f4f6;border-color:#ffffff55}
+.heroDark .secondary:hover{background:#ffffff14}
+.heroDark .heroProof span{color:#9a9aa6}
