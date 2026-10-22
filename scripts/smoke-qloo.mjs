@@ -10,8 +10,9 @@ if (!env.QLOO_API_KEY) {
 }
 env.QUORUM_ENABLE_LIVE ??= "true";
 env.QLOO_BASE_URL ??= "https://hackathon.api.qloo.com";
+env.TSX_TSCONFIG_PATH ??= resolve(root, "apps/quorum/tsconfig.json");
 
-const result = spawnSync(process.execPath, ["--import", "tsx", resolve(root, "apps/quorum/scripts/smoke-qloo.ts")], {
+const result = spawnSync(process.execPath, ["--conditions=react-server", "--import", "tsx", resolve(root, "apps/quorum/scripts/smoke-qloo.ts")], {
   stdio: "inherit",
   env,
   cwd: root,

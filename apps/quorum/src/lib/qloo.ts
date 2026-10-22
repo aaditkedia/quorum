@@ -6,11 +6,14 @@ import type { Favorite } from "./types";
 const entitySchema = z.object({
   entity_id: z.string().uuid().transform(id => id.toLowerCase()),
   name: z.string().min(1).max(300),
-  subtype: z.string(),
+  // /v2/insights returns `subtype`; /search returns a `types` array instead.
+  subtype: z.string().optional(),
+  types: z.array(z.string()).optional(),
   properties: z.object({ description: z.string().optional() }).passthrough().optional(),
-  tags: z.array(z.object({ id: z.string(), name: z.string() }).passthrough()).optional(),
+  // Entity tags use `tag_id` on live responses; older docs show `id`.
+  tags: z.array(z.object({ id: z.string().optional(), tag_id: z.string().optional(), name: z.string() }).passthrough()).optional(),
   query: z.object({ affinity: z.number().optional(), score: z.number().optional() }).passthrough().optional(),
-}).passthrough();
+}).passthrough().transform(e => ({ ...e, subtype: e.subtype ?? e.types?.[0] ?? "" }));
 
 export type QlooEntity = z.infer<typeof entitySchema>;
 
@@ -58,7 +61,7 @@ function entities(data: unknown): QlooEntity[] {
 
 export async function searchQloo(query: string, type: string): Promise<Favorite[]> {
   return entities(await get("/search", { query, types: `urn:entity:${type}`, take: "8" }))
-    .filter(e => e.subtype === `urn:entity:${type}`)
+    .filter(e => e.subtype === `urn:entity:${type}` || (e.types ?? []).includes(`urn:entity:${type}`))
     .map(e => ({ id: e.entity_id.toLowerCase(), name: e.name, type, source: "qloo" }));
 }
 
