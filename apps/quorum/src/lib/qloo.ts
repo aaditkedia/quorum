@@ -16,7 +16,8 @@ const entitySchema = z.object({
   query: z.object({ affinity: z.number().optional(), score: z.number().optional() }).passthrough().optional(),
 }).passthrough().transform(e => ({ ...e, subtype: e.subtype ?? e.types?.[0] ?? "" }));
 
-export type QlooEntity = z.infer<typeof entitySchema>;
+// z.input keeps the passthrough index signature that the .transform() output drops.
+export type QlooEntity = z.input<typeof entitySchema> & { subtype: string };
 
 export const qlooReady = () => Boolean(process.env.QLOO_API_KEY && process.env.QUORUM_ENABLE_LIVE === "true");
 
