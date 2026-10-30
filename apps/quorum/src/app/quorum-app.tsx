@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { ArrowRight, ArrowUpRight, CalendarDays, Check, ChevronRight, Clipboard, Compass, Heart, LayoutGrid, Leaf, LoaderCircle, MapPin, Music2, Plus, RefreshCw, Scale, Sparkles, Users, X } from "lucide-react";
 import { SwarmTimeline } from "@hackathon/ui";
 import { demoFavorites } from "@/lib/demo";
-import type { Candidate, EventView, Favorite } from "@/lib/types";
+import type { Candidate, EventView, Favorite, Plan } from "@/lib/types";
 import styles from "./quorum.module.css";
 
 const percent = (n: number) => Math.round(n * 100);
@@ -158,6 +158,7 @@ export default function QuorumApp({ invite }: { invite?: string }) {
           {(tab === "overview" || tab === "group") && <section className={styles.groupStrip}><div><span className={styles.stepLabel}>THE PEOPLE BEHIND THE PLAN</span><h2>Different tastes. Equal say.</h2></div><div className={styles.people}>{event.attendees.map((a, i) => <div key={a.id} className={styles.person}><span style={{ background: colors[i] }}>{a.name.slice(0, 1).toUpperCase()}</span><strong>{a.name}</strong><small>{a.favorites.length} favorites</small></div>)}{!event.attendees.length && <p>Your people haven't joined yet. Share the private invite to get started.</p>}{event.role === "organizer" && <button className={styles.addPerson} onClick={copyInvite} aria-label="Copy invite link"><Plus size={22} /></button>}</div></section>}
           {tab === "group" && <div className={styles.memberGrid}>{event.attendees.map((a, i) => <article className={styles.memberCard} key={a.id}><span className={styles.memberAvatar} style={{ background: colors[i] }}>{a.name[0]}</span><h3>{a.name}'s taste</h3><p>A voice in every decision.</p>{a.favorites.map(f => <div className={styles.favoriteLine} key={f.id}><Heart size={14} /><span>{f.name}</span><small>{f.type}</small></div>)}</article>)}</div>}
           {(tab === "overview" || tab === "fairness") && plan && <div className={styles.metrics}><div><span className={styles.metricIcon}><Heart size={19} /></span><div><small>Lowest mean taste fit</small><strong>{percent(plan.minimum)}<em>/ 100</em></strong></div><span className={styles.metricPill}>Everyone counts</span></div><div><span className={styles.metricIcon}><Users size={19} /></span><div><small>Group average</small><strong>{percent(plan.average)}<em>/ 100</em></strong></div></div><div><span className={styles.metricIcon}><Scale size={19} /></span><div><small>Vs. average-first plan</small><strong>+{percent(Math.max(0, plan.minimum - plan.baselineMinimum))}<em>points for the minimum</em></strong></div></div></div>}
+          {(tab === "overview" || tab === "fairness") && plan && <ImpactPanel plan={plan} names={Object.fromEntries(event.attendees.map(a => [a.id, a.name]))} />}
           {tab === "overview" && <>
             <div className={styles.sectionTitle}><div><span className={styles.stepLabel}>THE COMMON GROUND</span><h2>{plan ? "An evening with a little bit of everyone." : "Your next plan starts with the group."}</h2></div>{event.role === "organizer" && <button className={styles.primary} disabled={Boolean(busy) || !event.attendees.length} onClick={() => action("plan", async () => { const updated = await api<EventView>(`/api/events/${event.id}/plan`, { method: "POST" }); setEvent(updated); setReplay(0); })}>{busy === "plan" ? <LoaderCircle size={17} className={styles.spin} /> : <Sparkles size={17} />}{busy === "plan" ? "Negotiating…" : plan ? "Negotiate again" : "Find our common ground"}</button>}</div>
             {!plan ? <div className={styles.empty}><Sparkles size={35} /><h3>{event.attendees.length ? "Ready when your group is." : "Make room at the table."}</h3><p>{event.role === "organizer" ? "Invite your people, collect three favorites each, then let the taste agents compare the possibilities." : "Your taste is saved. The organizer can now generate a plan for the group. This view refreshes automatically."}</p>{event.joinPath && <a className={styles.inviteLink} href={event.joinPath} target="_blank" rel="noreferrer">Open attendee invite <ArrowUpRight size={15} /></a>}</div> : <div className={styles.picksGrid}>{picks.map((pick, i) => <PickCard key={pick.id} pick={pick} index={i} />)}</div>}
@@ -177,4 +178,24 @@ function PickCard({ pick, index }: { pick: Candidate; index: number }) {
   const icon = pick.category === "playlist" ? <Music2 size={35} /> : pick.category === "activity" ? <Sparkles size={35} /> : pick.category === "destination" ? <MapPin size={35} /> : <Leaf size={35} />;
   const minimum = Math.min(...Object.values(pick.scores));
   return <article className={styles.pickCard}><div className={`${styles.pickVisual} ${styles[`visual${index % 4}`]}`}><span className={styles.pickCategory}>{pick.category === "dining" ? `DINING PICK ${index + 1}` : pick.category.toUpperCase()}</span><div className={styles.visualArt}>{icon}<i /><i /><i /></div><span className={styles.syntheticLabel}>{pick.source === "synthetic" ? "FICTIONAL DEMO PICK" : "QLOO ENTITY"}</span></div><div className={styles.pickBody}><div className={styles.pickTitle}><h3>{pick.name}</h3><ArrowUpRight size={18} /></div><p>{pick.description}</p><div className={styles.tags}>{pick.tags.map(t => <span key={t}>{t}</span>)}</div><div className={styles.pickFit}><Heart size={14} /><span>Lowest individual fit</span><strong>{percent(minimum)}<small>/100</small></strong></div></div></article>;
+}
+
+function ImpactPanel({ plan, names }: { plan: Plan; names: Record<string, string> }) {
+  const lift = percent(plan.minimum) - percent(plan.baselineMinimum);
+  const base = plan.baselineHappiness ?? {};
+  const helped = Object.keys(plan.happiness).filter(id => base[id] !== undefined && plan.happiness[id] > base[id] + 1e-9);
+  const worst = Object.entries(plan.happiness).sort((a, b) => a[1] - b[1])[0];
+  const cells = [
+    { k: "Least-happy person", v: `${percent(plan.baselineMinimum)} → ${percent(plan.minimum)}`, d: lift > 0 ? `+${lift} pts vs a popularity vote` : "Popularity vote already fair here" },
+    { k: "Group average", v: plan.baselineAverage !== undefined ? `${percent(plan.average)} vs ${percent(plan.baselineAverage)}` : `${percent(plan.average)}`, d: "Cost of fairness to the average, shown honestly" },
+    { k: "Jain fairness index", v: plan.jainIndex !== undefined ? plan.jainIndex.toFixed(3) : "—", d: plan.baselineJainIndex !== undefined ? `Popularity plan: ${plan.baselineJainIndex.toFixed(3)} (1.000 = perfectly even)` : "1.000 = perfectly even" },
+    { k: "Plans compared", v: String(plan.combinations), d: "Every complete combination, not a sample" },
+    { k: plan.mode === "live" ? "Qloo requests" : "Evidence", v: plan.qlooCalls ? `${plan.qlooCalls.live + plan.qlooCalls.cached}` : plan.mode === "live" ? "live" : "synthetic", d: plan.qlooCalls ? `${plan.qlooCalls.live} live · ${plan.qlooCalls.cached} cached in Neon` : "Demo mode makes no Qloo calls" },
+  ];
+  return <section aria-labelledby="impact-title" style={{ margin: "24px 0", padding: 24, borderRadius: 4, background: "#1c1710", color: "#f6ecdc", border: "1px solid #e0a04a55" }}>
+    <span style={{ letterSpacing: ".14em", fontSize: 12, color: "#e0a04a" }}>MEASURED IMPACT · THIS PLAN</span>
+    <h2 id="impact-title" style={{ margin: "6px 0 16px" }}>{lift > 0 ? `The quietest voice got ${lift} points happier.` : "Everyone already agreed. No one was overruled."}</h2>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(170px,1fr))", gap: 12 }}>{cells.map(c => <div key={c.k} style={{ background: "#ffffff0d", padding: 14, borderRadius: 4 }}><small style={{ opacity: .7 }}>{c.k}</small><strong style={{ display: "block", fontSize: 26, color: "#f3c27a" }}>{c.v}</strong><small style={{ opacity: .75 }}>{c.d}</small></div>)}</div>
+    <p style={{ marginTop: 14, fontSize: 14, opacity: .8 }}>{helped.length ? `Better off than under a popularity vote: ${helped.map(id => names[id] ?? "attendee").join(", ")}. ` : ""}{worst ? `Lowest fit now: ${names[worst[0]] ?? "attendee"} at ${percent(worst[1])}. ` : ""}All numbers are computed live from {plan.mode === "live" ? "Qloo affinity scores" : "synthetic demo scores"} for this plan; the baseline is the plan with the highest group average.</p>
+  </section>;
 }

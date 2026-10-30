@@ -46,5 +46,6 @@ export function negotiate(attendees: Pick<Attendee, "id">[], candidates: Candida
     if (!baseline || option.average > baseline.average + epsilon || (Math.abs(option.average - baseline.average) <= epsilon && (option.minimum > baseline.minimum + epsilon || (Math.abs(option.minimum - baseline.minimum) <= epsilon && stable < baselineIds)))) baseline = option;
   }
   if (!best || !baseline) throw new Error("Not enough distinct entities to compose a complete plan.");
-  return { ...best!, baselineMinimum: baseline!.minimum, combinations };
+  const jain = (h: Record<string, number>) => { const v = Object.values(h); const sq = v.reduce((a, b) => a + b * b, 0); const sum = v.reduce((a, b) => a + b, 0); return sq ? (sum * sum) / (v.length * sq) : 1; };
+  return { ...best!, baselineMinimum: baseline!.minimum, baselineAverage: baseline!.average, baselineHappiness: baseline!.happiness, jainIndex: jain(best!.happiness), baselineJainIndex: jain(baseline!.happiness), samePlanAsBaseline: best!.picks.slice().sort().join(",") === baseline!.picks.slice().sort().join(","), combinations };
 }

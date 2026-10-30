@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { negotiate } from "./fairness";
 import { syntheticCandidates } from "./demo";
 import { extractAffinity } from "./qloo-affinity";
-import { insights, searchTags } from "./qloo";
+import { insights, searchTags, qlooCounter, resetQlooCounter } from "./qloo";
 import { selectPoolIds } from "./candidate-pool";
 import { DINING_TAG, isFoodPlace } from "./dining-filter";
 import { appendLlmNarration } from "./llm-narration";
@@ -60,6 +60,7 @@ async function liveCandidates(event: QuorumEvent, log: (agent: string, detail: s
 export async function buildPlan(event: QuorumEvent): Promise<Plan> {
   if (!event.attendees.length) throw new Error("Add an attendee before negotiating.");
   if (event.mode === "live" && event.type === "trip" && event.attendees.length > 7) throw new Error("A live trip currently supports seven people under the 60-request budget. Synthetic trips support eight.");
+  resetQlooCounter();
   const steps: TraceStep[] = [];
   const log = (agent: string, detail: string) => steps.push({ seq: steps.length + 1, agent, detail, status: "complete", createdAt: new Date().toISOString() });
   log("Planner", `Prepare a ${event.type} for ${event.attendees.length} people. ${event.mode === "demo" ? "Hand-authored synthetic evidence only." : "Live Qloo evidence only."}`);
@@ -71,6 +72,7 @@ export async function buildPlan(event: QuorumEvent): Promise<Plan> {
   }
   log("Scout", `${candidates.length} fully scored candidates across dining, activity, playlist${event.type === "trip" ? ", and destination" : ""}. Budget is a planning brief; prices and availability need confirmation.`);
   const result = negotiate(event.attendees, candidates, event.type === "trip");
+  log("Negotiator", `Popularity baseline (max average) leaves the least-happy person at ${Math.round(result.baselineMinimum * 100)}; maximin lifts them to ${Math.round(result.minimum * 100)}. Jain fairness index ${result.jainIndex.toFixed(3)} vs ${result.baselineJainIndex.toFixed(3)}.`);
   log("Negotiator", `Compared ${result.combinations} complete plans. Maximize minimum attendee mean; Borda points break ties. Lowest mean fit: ${Math.round(result.minimum * 100)}.`);
   for (const attendee of event.attendees) {
     const lowest = candidates.filter(c => result.picks.includes(c.id)).sort((a, b) => a.scores[attendee.id] - b.scores[attendee.id])[0];
@@ -82,5 +84,6 @@ export async function buildPlan(event: QuorumEvent): Promise<Plan> {
     log("Negotiator", `LLM narration skipped: ${error instanceof Error ? error.message : "unknown error"}. Deterministic trace remains authoritative.`);
   }
   log("Planner", "Published a local proposal with two dining picks, one shared activity and one playlist artist. This is a proposal; no reservation or message was sent.");
-  return { id: randomUUID(), mode: event.mode, candidates, ...result, steps, createdAt: new Date().toISOString() };
+  if (event.mode === "live") log("Scout", `Qloo requests for this plan: ${qlooCounter.live} live, ${qlooCounter.cached} served from the Neon cache.`);
+  return { id: randomUUID(), mode: event.mode, candidates, ...result, qlooCalls: { ...qlooCounter }, steps, createdAt: new Date().toISOString() };
 }

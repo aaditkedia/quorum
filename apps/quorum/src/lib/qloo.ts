@@ -22,6 +22,8 @@ export type QlooEntity = z.input<typeof entitySchema> & { subtype: string };
 export const qlooReady = () => Boolean(process.env.QLOO_API_KEY && process.env.QUORUM_ENABLE_LIVE === "true");
 
 const memoryCalls: number[] = [];
+export const qlooCounter = { live: 0, cached: 0 };
+export const resetQlooCounter = () => { qlooCounter.live = 0; qlooCounter.cached = 0; };
 
 async function get(endpoint: "/search" | "/v2/insights" | "/v2/tags", params: Record<string, string>) {
   if (!qlooReady()) throw new Error("Live Qloo integration is blocked: set QLOO_API_KEY and explicitly enable QUORUM_ENABLE_LIVE.");
@@ -31,7 +33,7 @@ async function get(endpoint: "/search" | "/v2/insights" | "/v2/tags", params: Re
   for (const [key, value] of Object.entries(params)) url.searchParams.set(key, value);
   const key = cacheKey(url.toString());
   const cached = await readCache(key);
-  if (cached !== undefined) return cached;
+  if (cached !== undefined) { qlooCounter.cached++; return cached; }
   const calls = memoryCalls.filter(t => t > Date.now() - 60_000);
   memoryCalls.length = 0;
   memoryCalls.push(...calls);
@@ -39,6 +41,7 @@ async function get(endpoint: "/search" | "/v2/insights" | "/v2/tags", params: Re
   memoryCalls.push(Date.now());
   const response = await fetch(url, { headers: { "X-Api-Key": process.env.QLOO_API_KEY!, accept: "application/json" }, signal: AbortSignal.timeout(10_000), cache: "no-store" });
   if (!response.ok) throw new Error(`Qloo returned HTTP ${response.status}. No synthetic fallback was substituted.`);
+  qlooCounter.live++;
   const data: unknown = await response.json();
   await writeCache(key, data);
   return data;
