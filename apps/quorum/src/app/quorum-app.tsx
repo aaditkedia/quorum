@@ -188,7 +188,7 @@ function ImpactPanel({ plan, names }: { plan: Plan; names: Record<string, string
   const cells = [
     { k: "Least-happy person", v: `${percent(plan.baselineMinimum)} → ${percent(plan.minimum)}`, d: lift > 0 ? `+${lift} pts vs a popularity vote` : "Popularity vote already fair here" },
     { k: "Group average", v: plan.baselineAverage !== undefined ? `${percent(plan.average)} vs ${percent(plan.baselineAverage)}` : `${percent(plan.average)}`, d: "Cost of fairness to the average, shown honestly" },
-    { k: "Jain fairness index", v: plan.jainIndex !== undefined ? plan.jainIndex.toFixed(3) : "—", d: plan.baselineJainIndex !== undefined ? `Popularity plan: ${plan.baselineJainIndex.toFixed(3)} (1.000 = perfectly even)` : "1.000 = perfectly even" },
+    { k: "Jain fairness index", v: plan.jainIndex !== undefined ? plan.jainIndex.toFixed(4) : "—", d: plan.baselineJainIndex !== undefined ? `Popularity plan: ${plan.baselineJainIndex.toFixed(4)} (1.0000 = perfectly even)` : "1.000 = perfectly even" },
     { k: "Plans compared", v: String(plan.combinations), d: "Every complete combination, not a sample" },
     { k: plan.mode === "live" ? "Qloo requests" : "Evidence", v: plan.qlooCalls ? `${plan.qlooCalls.live + plan.qlooCalls.cached}` : plan.mode === "live" ? "live" : "synthetic", d: plan.qlooCalls ? `${plan.qlooCalls.live} live · ${plan.qlooCalls.cached} cached in Neon` : "Demo mode makes no Qloo calls" },
   ];

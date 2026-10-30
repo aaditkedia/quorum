@@ -72,7 +72,7 @@ export async function buildPlan(event: QuorumEvent): Promise<Plan> {
   }
   log("Scout", `${candidates.length} fully scored candidates across dining, activity, playlist${event.type === "trip" ? ", and destination" : ""}. Budget is a planning brief; prices and availability need confirmation.`);
   const result = negotiate(event.attendees, candidates, event.type === "trip");
-  log("Negotiator", `Popularity baseline (max average) leaves the least-happy person at ${Math.round(result.baselineMinimum * 100)}; maximin lifts them to ${Math.round(result.minimum * 100)}. Jain fairness index ${result.jainIndex.toFixed(3)} vs ${result.baselineJainIndex.toFixed(3)}.`);
+  log("Negotiator", `Popularity baseline (max average) leaves the least-happy person at ${Math.round(result.baselineMinimum * 100)}; maximin lifts them to ${Math.round(result.minimum * 100)}. Jain fairness index ${result.jainIndex.toFixed(4)} vs ${result.baselineJainIndex.toFixed(4)}.`);
   log("Negotiator", `Compared ${result.combinations} complete plans. Maximize minimum attendee mean; Borda points break ties. Lowest mean fit: ${Math.round(result.minimum * 100)}.`);
   for (const attendee of event.attendees) {
     const lowest = candidates.filter(c => result.picks.includes(c.id)).sort((a, b) => a.scores[attendee.id] - b.scores[attendee.id])[0];

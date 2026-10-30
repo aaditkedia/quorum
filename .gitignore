@@ -15,3 +15,4 @@ __pycache__/
 .gg-oidc-token
 .gg-gcp-credentials.json
 uploads/
+.vercel
