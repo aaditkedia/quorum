@@ -84,3 +84,15 @@ See `apps/quorum/docs/submission-checklist.md`.
 - `apps/quorum` — Next.js app
 - `packages/swarm-core` — optional LLM JSON adapter
 - `packages/ui` — timeline UI
+
+## Measured impact panel (added Oct 30, 2026)
+
+Every generated plan now shows a **Measured impact** panel computed from that plan only:
+
+- **Least-happy person:** popularity-vote plan (max group average) vs Quorum's maximin plan.
+- **Group average:** what fairness cost the average, shown honestly.
+- **Jain fairness index** (Jain, Chiu & Hawe, 1984): 1.0 = perfectly even happiness.
+- **Plans compared:** exhaustive count of complete plans.
+- **Qloo requests:** live calls vs responses served from the Neon cache.
+
+No stats are invented. If the popularity vote is already fair, the panel says so.

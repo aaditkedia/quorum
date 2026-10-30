@@ -139,7 +139,7 @@ export default function QuorumApp({ invite }: { invite?: string }) {
       <div className={styles.profile}><span>AK</span><div><strong>Local workspace</strong><small>Private prototype</small></div><Leaf size={16} /></div>
     </aside>
     <main className={styles.main}>
-      <header className={styles.topbar}><span>Workspace <ChevronRight size={13} /> {tab === "overview" ? "Your plan" : nav.find(n => n.id === tab)?.label}</span><span className={styles.demoBadge}><i />{event?.mode === "live" ? "Live Qloo · unverified integration" : "Synthetic demo"}</span></header>
+      <header className={styles.topbar}><span>Workspace <ChevronRight size={13} /> {tab === "overview" ? "Your plan" : nav.find(n => n.id === tab)?.label}</span><span className={styles.demoBadge}><i />{event?.mode === "live" ? "Live Qloo Taste AI" : "Synthetic demo"}</span></header>
       <div className={styles.content}>
         {error && <div className={styles.error} role="alert">{error}<button aria-label="Dismiss error" onClick={() => setError("")}><X size={16} /></button></div>}
         {notice && <div className={styles.notice} role="status">{notice}<button aria-label="Dismiss notice" onClick={() => setNotice("")}><X size={16} /></button></div>}
